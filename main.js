@@ -4,38 +4,16 @@ let remainingCharacters = [];
 let storyProgress = {};
 let slasherEnabled = false;
 
-const horrorEvents = {
-    "9PM": [
-        "A window slams shut. No wind.",
-        "[CHAR] hears faint whispers from the woods.",
-        "A shadow moves outside, but when [CHAR] looks, it's gone.",
-        "The lights flicker, then return to normal.",
-        "[CHAR]'s phone vibrates. It's an unknown number."
-    ],
-    "11PM": [
-        "Someone’s phone rings—Unknown Caller.",
-        "Footsteps creak upstairs. But everyone is here.",
-        "A painting on the wall is now crooked, though no one touched it.",
-        "[CHAR] swears they just heard their name whispered in their ear."
-    ],
-    "12:30AM": [
-        "A loud THUMP echoes from the upper floor.",
-        "[CHAR] glances around. 'Wait… where’s [CHAR2]?'",
-        "A smear of blood appears on the floor.",
-        "You hear scratching at the door, but when you check, there’s nothing."
-    ]
-};
-
 // Enable the extension
 function enableSlasherNight() {
     slasherEnabled = true;
-    console.log("Slasher Night enabled.");
+    console.log("🔪 Slasher Night enabled. Prepare for horror.");
 }
 
 // Disable the extension
 function disableSlasherNight() {
     slasherEnabled = false;
-    console.log("Slasher Night disabled.");
+    console.log("🚪 Slasher Night disabled.");
 }
 
 // Triggers an intro message when a new chat starts
