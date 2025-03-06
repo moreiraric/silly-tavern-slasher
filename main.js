@@ -1,87 +1,133 @@
-let gameTime = 18; // Start at 6:00 PM
-let activeCharacters = [];
-let remainingCharacters = [];
-let storyProgress = {};
-let slasherEnabled = false;
+// Global Variables
+let gameTime = 18;            // 6:00 PM start
+let activeCharacters = [];     // All characters in the session
+let remainingCharacters = [];  // Those who are still alive/missing
+let slasherEnabled = false;    // Tracks if the extension is enabled
 
-// Enable the extension
+// Horror Event Pools
+const horrorEvents = {
+  "9PM": [
+    "A window slams shut. No wind.",
+    "[CHAR] hears faint whispers from the woods.",
+    "A shadow moves outside, but when [CHAR] looks, it's gone.",
+    "The lights flicker, then return to normal.",
+    "[CHAR]'s phone vibrates. It's an unknown number."
+  ],
+  "11PM": [
+    "Someone’s phone rings—Unknown Caller.",
+    "Footsteps creak upstairs... but everyone is here.",
+    "A painting on the wall is now crooked, though no one touched it.",
+    "[CHAR] swears they just heard their name whispered in their ear."
+  ],
+  "12:30AM": [
+    "A loud THUMP echoes from the upper floor.",
+    "[CHAR] glances around. 'Wait... where’s [CHAR2]?'",
+    "A smear of blood appears on the floor.",
+    "You hear scratching at the door, but there's nothing outside."
+  ]
+};
+
+// EXTENSION ENABLE/DISABLE
 function enableSlasherNight() {
-    slasherEnabled = true;
-    console.log("🔪 Slasher Night enabled. Prepare for horror.");
+  slasherEnabled = true;
+  console.log("🔪 Slasher Night enabled. Let the horror begin.");
 }
-
-// Disable the extension
 function disableSlasherNight() {
-    slasherEnabled = false;
-    console.log("🚪 Slasher Night disabled.");
+  slasherEnabled = false;
+  console.log("🚪 Slasher Night disabled.");
 }
 
-// Triggers an intro message when a new chat starts
-function startIntroMessage() {
-    if (!slasherEnabled) return;
-    console.log("🌲 The night is quiet as you and your friends arrive at the lake house. The air is crisp, the moon high in the sky. Nothing seems wrong... yet.");
+// INITIAL INTRO
+function introMessage() {
+  if (!slasherEnabled) return;
+  console.log("🌲 The night is quiet as you and your friends arrive at the lake house. The air is crisp, the moon high. Nothing seems wrong... yet.");
 }
 
-// Initializes the game with characters
+// COMMAND: initialize_game
 function initializeGame(characters) {
-    if (!slasherEnabled) return;
-    activeCharacters = characters;
-    remainingCharacters = [...characters];
-    storyProgress = {};
-    startIntroMessage();
-    console.log("Slasher Night Initialized with characters: " + activeCharacters.join(", "));
+  if (!slasherEnabled) return;
+  activeCharacters = characters;
+  remainingCharacters = [...characters];
+  gameTime = 18; // reset time to 6 PM
+  console.log(`Slasher Night Initialized with characters: ${activeCharacters.join(", ")}`);
+  introMessage();
 }
 
-// Advances time by 10-15 minutes
+// COMMAND: advance_time
 function advanceTime() {
-    if (!slasherEnabled) return;
-    let timeJump = Math.floor(Math.random() * (15 - 10 + 1)) + 10;
-    gameTime += timeJump;
-    console.log("⏳ Time advanced by " + timeJump + " minutes. Current time: " + formatTime(gameTime));
-    checkForHorrorEvents();
+  if (!slasherEnabled) return;
+  let jump = Math.floor(Math.random() * 6) + 10; // 10-15
+  gameTime += jump;
+  console.log(`⏳ Time advanced by ${jump} minutes. Current time: ${formatTime(gameTime)}`);
+  checkForHorrorEvents();
 }
 
-// Checks if a horror event should trigger
-function checkForHorrorEvents() {
-    if (!slasherEnabled) return;
-    let timeWindow = getTimeWindow();
-    if (timeWindow && Math.random() < 0.5) { // 50% chance of an event
-        triggerHorrorEvent(timeWindow);
-    }
+// COMMAND: force_event
+function triggerHorrorEvent() {
+  if (!slasherEnabled) return;
+  // Force a random time window event
+  let windowKeys = Object.keys(horrorEvents);
+  let randomWindow = windowKeys[Math.floor(Math.random() * windowKeys.length)];
+  performHorrorEvent(randomWindow);
 }
 
-// Triggers a horror event
-function triggerHorrorEvent(timeWindow) {
-    if (!slasherEnabled) return;
-    let eventList = horrorEvents[timeWindow];
-    let selectedEvent = eventList[Math.floor(Math.random() * eventList.length)];
-    let character = getRandomCharacter();
-    console.log(selectedEvent.replace("[CHAR]", character));
-}
-
-// Removes a character from the game
+// COMMAND: kill_character
 function killCharacter() {
-    if (!slasherEnabled || remainingCharacters.length <= 1) return;
-    let victim = remainingCharacters.splice(Math.floor(Math.random() * remainingCharacters.length), 1)[0];
-    console.log("💀 " + victim + " has disappeared...");
+  if (!slasherEnabled) return;
+  if (remainingCharacters.length <= 1) {
+    console.log("⚠️ Not enough characters to kill. The final survivor remains.");
+    return;
+  }
+  let victimIndex = Math.floor(Math.random() * remainingCharacters.length);
+  let victim = remainingCharacters.splice(victimIndex, 1)[0];
+  console.log(`💀 ${victim} has disappeared...`);
 }
 
-// Returns the appropriate time window for events
+// CHECK FOR HORROR EVENTS AFTER TIME ADVANCES
+function checkForHorrorEvents() {
+  let windowName = getTimeWindow();
+  if (!windowName) return;    // No event window
+  // 50% chance to trigger an event
+  if (Math.random() < 0.5) {
+    performHorrorEvent(windowName);
+  }
+}
+
+// HELPER: Execute a random horror event from the chosen time window
+function performHorrorEvent(windowName) {
+  let events = horrorEvents[windowName];
+  if (!events || events.length === 0) return;
+  let eventText = events[Math.floor(Math.random() * events.length)];
+  // Replace [CHAR] with a random character, [CHAR2] with another random character
+  let char1 = getRandomCharacter();
+  let char2 = getRandomCharacter(char1); // ensure it's not the same as char1
+  eventText = eventText.replace("[CHAR]", char1).replace("[CHAR2]", char2);
+  console.log(eventText);
+}
+
+// DETERMINE WHICH TIME WINDOW WE'RE IN
 function getTimeWindow() {
-    if (gameTime >= 21 && gameTime < 23) return "9PM";
-    if (gameTime >= 23 && gameTime < 24) return "11PM";
-    if (gameTime >= 24) return "12:30AM";
-    return null;
+  if (gameTime >= 21 && gameTime < 23) return "9PM";
+  if (gameTime >= 23 && gameTime < 24) return "11PM";
+  if (gameTime >= 24) return "12:30AM";
+  return null;
 }
 
-// Picks a random remaining character
-function getRandomCharacter() {
-    return remainingCharacters[Math.floor(Math.random() * remainingCharacters.length)];
+// RANDOM CHARACTER PICK
+function getRandomCharacter(exclude) {
+  if (remainingCharacters.length === 0) return "Nobody";
+  let viable = remainingCharacters.filter(c => c !== exclude);
+  if (viable.length === 0) viable = remainingCharacters;
+  return viable[Math.floor(Math.random() * viable.length)];
 }
 
-// Formats time for display
-function formatTime(time) {
-    let hours = Math.floor(time);
-    let minutes = (time % 1) * 60;
-    return `${hours}:${minutes < 10 ? '0' : ''}${minutes} ${hours >= 12 ? 'PM' : 'AM'}`;
+// FORMAT TIME
+function formatTime(num) {
+  // Each increment is about 1 hour from 6 PM
+  let baseHour = Math.floor(num);
+  // Convert to 12-hour format
+  let suffix = baseHour >= 12 ? "PM" : "AM";
+  let displayHour = baseHour > 12 ? baseHour - 12 : baseHour;
+  if (displayHour === 0) displayHour = 12;
+  return `${displayHour}:00 ${suffix}`;
 }
