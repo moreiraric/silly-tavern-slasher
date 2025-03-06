@@ -1,0 +1,33 @@
+{
+  "name": "Slasher Night",
+  "version": "1.1",
+  "description": "A dynamic slasher horror experience for Silly Tavern. Time progresses as you chat, horror escalates, and characters fight to survive. How many will make it out alive?",
+  "author": "Your Name",
+  "entry": "main.js",
+  "extensions": {
+    "enable": "enableSlasherNight",
+    "disable": "disableSlasherNight"
+  },
+  "commands": {
+    "initialize_game": {
+      "description": "Start a new Slasher Night session. Provide a list of characters.",
+      "example": "/start_slash characters=[Danny, Wesley, Tiffany, Harrison, Ivy, Player]",
+      "function": "initializeGame"
+    },
+    "advance_time": {
+      "description": "Manually advance the in-game time.",
+      "example": "/fastforward",
+      "function": "advanceTime"
+    },
+    "force_event": {
+      "description": "Trigger a horror event immediately.",
+      "example": "/trigger_event",
+      "function": "triggerHorrorEvent"
+    },
+    "kill_character": {
+      "description": "Mark a character as missing or dead.",
+      "example": "/killnext",
+      "function": "killCharacter"
+    }
+  }
+}
